@@ -1,0 +1,149 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<script type="text/javascript">
+$(document).ready(function () {
+	//$(document).pjax('.pjax', '#pjax-container');
+	
+	$('a.pjax').off().on('click', function(e) {
+		var $this = $(this);
+		var tgtUrl = $this.attr('href');
+
+		$.pjax( {
+			container : '#pjax-container',
+			url : tgtUrl
+		});
+
+		//add active class if this is a list item (removing it from all siblings)
+		if ($this.hasClass('list-group-item')) {
+			$this
+				.addClass('active')
+				.siblings()
+					.removeClass('active');
+		}
+
+		e.preventDefault();
+	});
+	
+	
+	$('.live-search-list a').each(function(){
+		$(this).attr('data-search-term', $(this).find('.list-group-item-heading').text().toLowerCase());
+	});
+	
+	$('.live-search-box').on('keyup', function(){
+		var searchTerm = $(this).val().toLowerCase();
+	    $('.live-search-list a').each(function(){
+	        if ($(this).filter('[data-search-term *= ' + searchTerm + ']').length > 0 || searchTerm.length < 1) {
+	            $(this).show();
+	        } else {
+	            $(this).hide();
+	        }
+	    });
+	});
+			
+});
+	
+</script>
+<div class="col-sm-6 bootcards-list" id="list" data-title="Workspaces">		
+				<div class="panel panel-default">					
+					<div class="panel-body">
+						<div class="search-form">
+							<div class="row">
+							    <div class="col-xs-9">
+							      <div class="form-group">
+								      <input type="text" class="form-control live-search-box" placeholder="Search Workspaces...">
+								      <i class="fa fa-search"></i>
+							      </div>
+							    </div>
+							    <div class="col-xs-3">
+									<a class="btn btn-primary btn-block" href="#" data-toggle="modal" data-target="#editModal">
+										<i class="fa fa-plus"></i> 
+										<span>Add</span>
+									</a>
+							    </div>
+							</div>						    
+						</div>				
+					</div>
+					<div class="list-group live-search-list">
+					    {% for workspace_ in workspaces %}
+    						<a class=" {% if workspace_.name ==  workspace.name %}active{% endif %} list-group-item pjax" href="/workspaces/{{ workspace_.pk }}">
+    					 			
+    							<div class="row">
+    								<div class="col-sm-6">
+    									<i class="fa fa-3x fa-folder-open-o pull-left"></i>
+    									<h4 class="list-group-item-heading">{{ workspace_.name }}</h4>
+    									<p class="list-group-item-text">{{ workspace_.state.status }}</p>
+    								</div>
+    								<div class="col-sm-6">
+    									<p class="list-group-item-text">{{ workspace_.created_at }}</p>
+    									<p class="list-group-item-text">{{ workspace_.state.IPAddress }}</p>
+    								</div>
+    							</div>
+    							
+    						</a>
+						{% endfor %}
+					</div>
+					<div class="panel-footer">
+					</div>					
+				</div>
+			</div>
+		
+			<div class="col-sm-6 bootcards-cards">
+				<div id="pjax-container">
+					{% if workspace %}
+					 	{% include "fragments/workspace.html"%}
+					{% endif %}
+				</div>
+			</div>	
+{% endblock %}
+
+
+{% block modals %}
+<div class="modal fade in" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModal" aria-hidden="true" style="display: none; padding-right: 21px;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal add_workspace">
+            	{% csrf_token %}
+                <div class="modal-header">
+
+                    <div class="btn-group pull-left">
+                        <button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    </div>
+
+                    <div class="btn-group pull-right">
+                        <button id="media_delete_confirmation" class="btn btn-success" data-dismiss="modal1">Add</button>
+                    </div>
+                    <h3 class="modal-title">New Project</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-xs-3 control-label">Name</label>
+                        <div class="col-xs-9">
+                            <input type="text" name="name" class="form-control" placeholder="Project name" value="">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+ $("#media_delete_confirmation").click(function(e) {
+ 	e.preventDefault();
+ 	$.ajax({
+ 		type: "POST",
+ 		url: "/workspaces/add/",
+ 		data: $('form.add_workspace').serialize(),
+ 		success: function(msg) {
+ 			$("#editModal").modal('hide');
+ 		},
+ 		error: function() {
+ 			alert("failure");
+ 		}
+ 	});
+ 	return false;
+ });
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+<div id="companyCard">
+	<div class="panel panel-default">
+		<div class="panel-heading clearfix">
+			<h3 class="panel-title pull-left">Workspace Details</h3>
+			<div class="btn-group pull-right visible-xs">
+				<a class="btn btn-primary" href="{{ workspace.url }}">
+					<i class="fa fa-pencil"></i>
+					<span>Open</span>
+				</a>
+			</div>
+			<a class="btn btn-primary pull-right hidden-xs" target="_blank" href="{{ request.scheme }}://{{ workspace.url }}.{{ request.get_host }}">
+				<i class="fa fa-pencil"></i>
+				<span>Open</span>
+			</a>
+		</div>
+		<div class="list-group">
+			<div class="list-group-item">
+				<i class="fa fa-2x fa-building-o pull-left"></i>
+				<label>Name</label>
+				<h4 class="list-group-item-heading">{{ workspace.name }}</h4>
+			</div>
+		</div>
+		<div class="panel-footer">
+		</div>		
+	</div>
+	
+	
+	<div class="panel panel-default">
+		<div class="panel-heading clearfix">
+			<h3 class="panel-title pull-left">Endpoints</h3>
+		</div>					
+		<div class="list-group">
+			{% for endpoint in workspace.endpoints %}
+			 	
+				<a class="list-group-item pjax" target="_blank" href="{{ request.scheme }}://{{ endpoint.name }}.endpoints.{{ request.get_host }}">
+					<i class="fa fa-2x pull-left fa-plug"></i>
+					<h4 class="list-group-item-heading">{{ endpoint.program }}</h4>
+					<p class="list-group-item-text">{{ endpoint.protocol }} {{ endpoint.port }}</p>
+				</a>
+			{% endfor %}
+		</div>
+		<div class="panel-footer">
+		</div>			
+	</div>
+	
+	<div class="panel panel-default">
+		<div class="panel-heading clearfix">
+			<h3 class="panel-title pull-left">Info</h3>
+		</div>					
+		<div class="list-group">
+			<div class="list-group-item">
+				<h4 class="list-group-item-heading"><pre>{{ workspace.info }}</pre></h4>
+			</div>
+		</div>
+		<div class="panel-footer">
+		</div>			
+	</div>
+				
+				
+</div>

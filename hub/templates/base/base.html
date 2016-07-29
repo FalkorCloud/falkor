@@ -1,0 +1,70 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+
+  <title>{% block title %}Falkor{% endblock %}</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/css/bootcards-desktop.min.css" rel="stylesheet" type="text/css">
+
+  <link href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" rel="stylesheet">
+
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+ 
+  <script>var isDesktop = true;</script>
+  
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <style type="text/css">
+    .navbar-brand {
+      padding: 0;
+    }
+  </style>
+</head>
+<body id="bootcards" class="">
+  {% include "base/header.html"%}
+  
+  <div class="container bootcards-container" id="main">
+	<div class="row">
+			{% block content %}{% endblock %}
+	</div>
+  </div>
+  {% include "base/footer.html"%}
+
+  
+  {% block modals %}{% endblock %}
+  
+  
+  <!-- Load the required JavaScript libraries -->
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.pjax/1.9.2/jquery.pjax.min.js"></script>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+  <!-- Bootcards JS file -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/js/bootcards.min.js"></script> 
+
+  
+  <script type="text/javascript">
+    //highlight first list group option (if non active yet)
+    if ( $('.list-group a.active').length === 0 ) {
+      $('.list-group a').first().addClass('active');
+    }
+
+    bootcards.init( {
+        offCanvasHideOnMainClick : true,
+        offCanvasBackdrop : true,
+        enableTabletPortraitMode : true,
+        disableRubberBanding : true,
+        disableBreakoutSelector : 'a.no-break-out'
+      });
+
+  </script>
+
+
+</body></html>
