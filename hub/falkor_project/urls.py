@@ -11,8 +11,4 @@ urlpatterns = [
     url(r'^logout/$', views.logout),
     
     url(r'^workspaces/$', views.workspaces),
-    
-    url(r'^workspaces/(?P<workspace_id>\d+)/$', views.workspace),
-    
-    url(r'^workspaces/add/$', views.workspaces_add),
 ]

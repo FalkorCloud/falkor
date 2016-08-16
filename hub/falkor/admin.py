@@ -41,6 +41,7 @@ class WorkspaceAdmin(admin.ModelAdmin):
             for proxy in cli.containers(filters={'status':'running', 'label': ['com.docker.compose.service=proxy']}):
                 if user_network['Name'] not in proxy["NetworkSettings"]["Networks"]:
                     cli.connect_container_to_network(proxy['Id'], user_network['Name'])
+            workspace.save()
     
     def claim_workspaces(self, request, queryset):   
         cli = docker_cli()

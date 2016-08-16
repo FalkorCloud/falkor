@@ -10,20 +10,58 @@ services:
             backend:
                 aliases:
                     - db
+                    
+    redis:
+        restart: always
+        image: redis
+        networks:
+            channels:
+                aliases:
+                    - redis
+                    
     web:
         depends_on:
+            - redis
+        restart: always
+        build: ./hub
+        environment:
+            - "DEBUG=true"
+            - "REDIS=true"
+        command: daphne -b 0.0.0.0 -p 8000 falkor_project.asgi:channel_layer
+        networks:
+            channels:
+            frontend:
+                aliases:
+                    - web
+                    
+    web-worker:
+        depends_on:
             - db
+            - redis
         restart: always
         build: ./hub
         environment:
             - "DEBUG=true"
             - "POSTGRES=true"
-        command: /usr/local/bin/gunicorn falkor_project.wsgi:application -w 2 -b :8000 --error-logfile - --access-logfile -
+            - "REDIS=true"
+        command: python manage.py runworker
         networks:
+            channels:
             backend:
-                aliases:
-                    - web
-                    
+            
+    dockerworker:
+        depends_on:
+            - redis
+        restart: always
+        build: ./hub
+        environment:
+            - "POSTGRES=true"
+            - "REDIS=true"
+        command: python manage.py dockerworker
+        networks:
+            channels:
+            backend: 
+            
     web-static:
       build: ./hub
       volumes:
@@ -36,7 +74,7 @@ services:
         environment:
             - DOMAIN_NAME
         networks:
-            - backend
+            - frontend
         ports:
             - "80:8080"
         volumes_from:
@@ -44,3 +82,5 @@ services:
 
 networks:
     backend:
+    channels:
+    frontend:

@@ -20,3 +20,5 @@ wsgiref==0.1.2
 meld3==0.6.10
 docker-py==1.9.0rc2
 psycopg2
+channels==0.17.1
+asgi_redis==0.14.0

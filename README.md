@@ -64,4 +64,8 @@ sudo docker run -it -d -p 9002:80 --volumes-from $volumeId cloud9
 
 unison . ssh://sueastside@us2.peragro.org//home/sueastside/Projects/cloud39 -auto -batch -repeat 3 -force .
 
+
+
+ docker start $(docker ps -a | grep falkor__user_ | awk "{print \$2}")
+
 ```

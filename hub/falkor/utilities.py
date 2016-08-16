@@ -23,18 +23,44 @@ def get_or_create_user_network(cli, user):
     networks = cli.networks(names=[network_name])
     if len(networks) < 1:
         network = cli.create_network(network_name, 'bridge')
+        network['Name'] = network_name
     else:
         network = networks[0]
         
     return network
+
+def get_workspace_state(cli, workspace):
+    workspace.state = {'status': 'Missing', 'IPAddress': 'None'}
+    if workspace.container_id:
+        try:
+            container = cli.inspect_container(workspace.container_id)
+            workspace.state['status'] = container['State']['Status']
+            workspace.state['IPAddress'] = container['NetworkSettings']['Networks'].items()[0][1]['IPAddress']
+        except Exception as e:
+            print e
+            pass
+    return workspace.state
+
+def get_workspace_endpoints(cli, workspace):
+    workspace.endpoints = []
+    if workspace.container_id:
+        container = cli.inspect_container(workspace.container_id)
+        if container['State']['Status'] == 'running':
+            command = cli.exec_create(workspace.container_id, 'netstat -tlnp')
+            output = cli.exec_start(command['Id'])
+            for line in output.split('\n')[2:-1]:
+                s = line.split()
+                if s[3].startswith('127.0.0.') and s[6] == '-':
+                    continue
+                if s[3].startswith('0.0.0.0:80') and s[6].endswith('/node'):
+                    continue
+                ip = container['NetworkSettings']['Networks'].items()[0][1]['IPAddress'].replace('.', '_')
+                name = s[0] +'-'+ ip + '-' +s[3].split(':')[1]
+                workspace.endpoints.append({'program': s[6], 'protocol': s[0], 'port': s[3], 'name': name})
+    return workspace.endpoints
     
 def get_workspaces_for_user(cli, user):
-    workspaces = user.created_projects.all()
+    workspaces = user.created_projects.all().order_by('-created_at')
     for workspace in workspaces:
-        if workspace.container_id:
-            try:
-                container = cli.inspect_container(workspace.container_id)
-                workspace.state = {'status': container['State']['Status'], 'IPAddress': container['NetworkSettings']['Networks'].items()[0][1]['IPAddress']}
-            except:
-                 workspace.state = {'status': 'Missing', 'IPAddress': 'None'}
+        get_workspace_state(cli, workspace)
     return workspaces

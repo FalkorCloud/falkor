@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'falkor',
     'social.apps.django_app.default',
+    'channels',
 )
 
 TEMPLATES = [
@@ -122,3 +123,26 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/static/'
+
+
+# In settings.py
+if os.getenv('REDIS') == 'true':
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "asgi_redis.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("redis", 6379)],
+            },
+            "ROUTING": "falkor_project.routing.channel_routing",
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "asgi_redis.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("172.17.0.4", 6379)],
+            },
+            "ROUTING": "falkor_project.routing.channel_routing",
+        },
+    }
