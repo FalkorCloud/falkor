@@ -43,8 +43,23 @@ docker exec -it falkor_web_1 python manage.py shell
 >>> u.is_staff=True
 >>> u.save()
 ```
- 
 
+
+Running
+-------
+
+Create a workspace and open it, in the terminal run:
+``` 
+python -m SimpleHTTPServer
+``` 
+Falkor will list this endpoint.
+
+
+Development
+------------
+``` 
+find . -type f -iname '*.py' | entr /bin/sh -c 'docker-compose build dockerworker && docker-compose up -d  --no-deps dockerworker'
+``` 
 
  
 Scrap
