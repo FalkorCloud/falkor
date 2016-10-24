@@ -35,6 +35,7 @@ def workspaces(request):
 
     if workspace_name:
         workspaces = request.user.created_projects.filter(name__iexact=workspace_name)
+        #TODO: update last used
     else:
         workspaces = request.user.created_projects.all()
     
@@ -43,7 +44,10 @@ def workspaces(request):
     for project in workspaces:
         if project.container_id:
             container = cli.inspect_container(project.container_id)
-            state = {'status': container['State']['Status'], 'IPAddress': container['NetworkSettings']['Networks'].items()[0][1]['IPAddress']}
+            state = {
+                'Id': container['Id'],
+                'status': container['State']['Status'], 
+                'IPAddress': container['NetworkSettings']['Networks'].items()[0][1]['IPAddress']}
             response_data[project.name.lower()] = state
         else:
             response_data[project.name.lower()] = None

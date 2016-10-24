@@ -3,11 +3,12 @@ from django.contrib import admin
 from .models import Project, Container
 from django.contrib.auth.models import User
 
-from utilities import docker_cli, get_or_create_user_network
+from guardian.admin import GuardedModelAdmin
+
+from .utilities import docker_cli, get_or_create_user_network
 
 
-
-class WorkspaceAdmin(admin.ModelAdmin):
+class WorkspaceAdmin(GuardedModelAdmin):
     actions = ['delete_and_remove', 'fix_networks', 'claim_workspaces']
     
     def get_actions(self, request):
@@ -51,6 +52,8 @@ class WorkspaceAdmin(admin.ModelAdmin):
                     workspace = Project()
                     workspace.user = User.objects.get(username='sueastside')
                     workspace.name = container['Names'][0].split('__workspace_', 1)[1]
+                    while Project.objects.filter(name__iexact=workspace.name, user=workspace.user).count():
+                        workspace.name = workspace.name + '_'
                     workspace.container_id = container['Id']
                     workspace.save()
     claim_workspaces.short_description = "Claim workspaces"        

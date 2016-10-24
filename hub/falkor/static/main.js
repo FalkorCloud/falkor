@@ -1,4 +1,12 @@
-var socket = new FancyWebSocket("ws://" + window.location.host + "/ws/");
+var websocketProtocol;
+if (window.location.protocol == 'https:') {
+	websocketProtocol = 'wss';
+} else {
+	websocketProtocol = 'ws';
+}
+
+
+var socket = new FancyWebSocket(websocketProtocol+"://" + window.location.host + "/ws/");
 
 var template = document.getElementById('template').innerHTML;
 var compiled_template = Handlebars.compile(template);
@@ -41,6 +49,11 @@ socket.bind('workspaces.select', function(data){
   data.info = JSON.stringify(data.info, null, 2);
   var rendered = workspace_details({workspace: data, request: request});
   $("#workspace-detail").empty().append(rendered);
+  
+  var rendered_listitem = compiled_template({workspace_: data});
+  $('[data-workspace="'+data.id+'"]').replaceWith(rendered_listitem);
+  update_search_terms();
+  $('[data-workspace="'+data.id+'"]').addClass('active').siblings().removeClass('active');
 });
 
 socket.bind('workspaces', function(data){
@@ -51,6 +64,11 @@ socket.bind('workspaces', function(data){
 		$("#workspaces").append(rendered);
 	}
 	update_search_terms();
+});
+
+socket.bind('notifications', function(data){
+	$("#notifications").empty().attr('class', '').addClass(data.level).text(data.message).fadeIn().fadeOut(5000);
+	
 });
 
 $(document).ready(function () {
@@ -67,6 +85,11 @@ $(document).ready(function () {
 		socket.send('workspaces.select', {workspace_id: $this.attr('data-workspace')} );
 		
 		return false;
+	});
+	
+	$('#workspace-detail').off().on('click', '.workspace-controls button', function(e) {
+		socket.send('workspaces.control', {workspace_id: $(this).parent().attr('data-workspace-id'), command: $(this).attr('data-command')} );
+		$(this).addClass('disabled');
 	});
 	
 	$("#add_workspace_button").click(function(e) {

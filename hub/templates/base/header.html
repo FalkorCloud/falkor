@@ -30,12 +30,14 @@
               Projects
             </a>          
           </li>
+          {% if user.is_staff %}
           <li>
             <a href="/admin" data-pjax="#main" data-title="Admin">
              <i="" class="fa fa-gears">
               Admin
             </a>          
           </li>
+          {% endif %}
           <li>
             <a href="/logout" data-pjax="#main" data-title="Logout">
               <i="" class="fa fa-gears">
@@ -43,6 +45,13 @@
             </a>          
           </li>
         </ul>
-      </div>          
+        
+        <span class="pull-right">
+          <span id="notifications">
+          </span>
+        </span>
+
+      </div>      
+
     </div>
   </div>   

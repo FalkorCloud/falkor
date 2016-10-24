@@ -19,7 +19,7 @@ class Command(BaseCommand):
                 workspace = workspaces[0]
                 c.send({
                         "user__pk":  workspace.user.pk,
-                        "status":  container['State'],
+                        "status":  container.get('State', 'Unknown'),
                         "workspace__pk":  workspace.pk,
                         })
             

@@ -5,7 +5,7 @@ services:
         restart: always
         image: postgres
         volumes:
-            - /var/lib/postgresql/data/
+            - falkor_db:/var/lib/postgresql/data/
         networks:
             backend:
                 aliases:
@@ -67,20 +67,48 @@ services:
       volumes:
         - /static
       command: python manage.py collectstatic --noinput
+    
+    web-proxy:
+      depends_on:
+            - proxy
+            - db
+      build: ./hub
+      environment:
+            - "POSTGRES=true"
+      command: python manage.py fix_networks
+      networks:
+            backend:
       
     proxy:
         restart: always
         build: ./proxy
         environment:
             - DOMAIN_NAME
+            - SECRET
         networks:
             - frontend
         ports:
             - "80:8080"
+            - "443:8443"
+        volumes:
+            - /etc/letsencrypt/:/etc/letsencrypt/
         volumes_from:
             - web-static:ro
-
+    
+    docker:
+        restart: always
+        image: bobrik/socat
+        command: -d -d TCP-L:2375,fork UNIX:/var/run/docker.sock
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+            frontend:
+            backend:
+            
 networks:
     backend:
     channels:
     frontend:
+
+volumes:
+    falkor_db:

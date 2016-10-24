@@ -10,7 +10,7 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 
-from .utilities import get_workspaces_for_user, docker_cli, get_workspace_state, get_workspace_endpoints, get_or_create_user_network
+from .utilities import get_workspaces_for_user, docker_cli, get_workspace_state, get_workspace_endpoints, get_or_create_user_network, get_workspace_files
 
 def create_event(event_name, data):
     print 'CREATE',  event_name
@@ -24,10 +24,12 @@ def create_event(event_name, data):
 
 def model_to_dict(instance):
     w = {field.name: field.value_from_object(instance) for field in instance._meta.fields}
+    w.update({'running': getattr(instance, 'running', None)})
     w.update({'state': getattr(instance, 'state', None)})
     w.update({'info': getattr(instance, 'info', None)})
     w.update({'endpoints': getattr(instance, 'endpoints', None)})
     w.update({'url': getattr(instance, 'url', lambda: None)()})
+    w.update({'files': getattr(instance, 'files', None)})
     return w
 
 #--------------------------------------------------
@@ -61,10 +63,36 @@ def select_workspace(message):
         cli = docker_cli()
         container = cli.inspect_container(workspace.container_id)
         workspace.info = container
+        get_workspace_state(cli, workspace)
         get_workspace_endpoints(cli, workspace)
+        get_workspace_files(cli, workspace)
     
     Group("user-%s" % workspace.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
 
+
+@channel_session_user
+def control_workspace(message):
+    data = json.loads(message['data'])
+    workspace = get_object_or_404(Project, pk=data['workspace_id'], user=message.user)
+    
+    command = data['command']
+    
+    if workspace.container_id:
+        cli = docker_cli()
+        if command == 'start':
+            cli.start(workspace.container_id)
+            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'started container'}))
+        elif command == 'stop':
+            cli.stop(workspace.container_id)
+            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'stopped container'}))
+        else:
+            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'error', 'message': 'No such command '+command}))
+        container = cli.inspect_container(workspace.container_id)
+        workspace.info = container
+        get_workspace_state(cli, workspace)
+        get_workspace_endpoints(cli, workspace)
+            
+    Group("user-%s" % workspace.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
 
 @channel_session_user
 def add_workspace(message):
@@ -85,7 +113,7 @@ def add_workspace(message):
     
     name = 'falkor__user_{0}__workspace_{1}'.format(message.user.pk, slugify(workspace.name))
     
-    container = cli.create_container(image='kdelfour/cloud9-docker', detach=True, stdin_open=True, tty=True, name=name, host_config=cli.create_host_config(network_mode=network['Id']))
+    container = cli.create_container(image='falkor/cloud9-docker', detach=True, stdin_open=True, tty=True, name=name, host_config=cli.create_host_config(network_mode=network['Id']))
     for proxy in cli.containers(filters={'status':'running', 'label': 'com.docker.compose.service=proxy'}):
         if network['Name'] not in proxy["NetworkSettings"]["Networks"]:
             cli.connect_container_to_network(proxy['Id'], network['Name'])

@@ -28,6 +28,7 @@ INSTALLED_APPS = (
     'falkor',
     'social.apps.django_app.default',
     'channels',
+    'guardian',
 )
 
 TEMPLATES = [
@@ -54,9 +55,9 @@ TEMPLATES = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-
     'social.backends.github.GithubOAuth2',
-    'django.contrib.auth.backends.ModelBackend'
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 MIDDLEWARE_CLASSES = (

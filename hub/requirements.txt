@@ -22,3 +22,4 @@ docker-py==1.9.0rc2
 psycopg2
 channels==0.17.1
 asgi_redis==0.14.0
+django-guardian==1.4.5
