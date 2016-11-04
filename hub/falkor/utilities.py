@@ -14,8 +14,7 @@ def get_default_gateway_linux():
 
 
 def docker_cli():
-    return Client(version=settings.DOCKER_API, base_url='http://'+get_default_gateway_linux()+':2375')
-    #return Client(version=settings.DOCKER_API, base_url='http://docker:2375')
+    return Client(version=settings.DOCKER_API, base_url='http://docker:2375')
     
     
 def get_or_create_user_network(cli, user):
