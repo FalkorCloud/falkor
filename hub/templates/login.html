@@ -1,322 +1,149 @@
-<html lang="en"><head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<html lang="en">
 
-  <title>Falkor: Soar through the cloud</title>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/css/bootcards-desktop.min.css" rel="stylesheet" type="text/css">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 
-  <link href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" rel="stylesheet">
+	<title>Falkor: Soar through the cloud</title>
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.0/gh-fork-ribbon.min.css" />
 
-  <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
- 
-  <script>var isDesktop = true;</script>
-  
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  
-  <style type="text/css">
-    .external-login-button i.fa {
-      font-size: 46px;
-      width: auto !important;
-    }
-    .external-login-button .login-text {
-      margin-top: 6px;
-      display: block;
-      font-size: 14px;
-    }
-    .external-logins {
-      text-align: center;
-      padding: 50px 0px;
-    }
-    .external-login-button .login-text .suffix {
-     font-weight: 700;
-    }
-    
-    #background {
-      position: absolute;
-    }
-    #main {
-      padding-top: 120px;
-      height: 100%;
-    }
-  </style>
+	<style type="text/css">
+		.external-login-button i.fa {
+			font-size: 46px;
+			width: auto !important;
+		}
+		
+		.external-login-button .login-text {
+			margin-top: 6px;
+			display: block;
+			font-size: 14px;
+		}
+		
+		.external-logins {
+			text-align: center;
+			padding: 50px 0px;
+		}
+		
+		.external-login-button .login-text .suffix {
+			font-weight: 700;
+		}
+	</style>
 
- <style type="text/css">
-
-			body {
-				background-color: #326696;
-				margin: 0px;
-				padding: 0px;
-				overflow: hidden;
-				font-family:Monospace;
-				font-size:13px;
-				text-align:center;
-				font-weight: bold;
-				text-align:center;
-				height: 100%;
-			}
-		</style>
+	<style type="text/css">
+		body {
+			background-color: #326696;
+			margin: 0px;
+			padding: 0px;
+			overflow: hidden;
+			height: 100%;
+		}
+		.container {
+			padding-top: 120px;
+		}
+		body div {
+			z-index: 2;
+			text-align: center;
+		}
+		#background {
+			position: fixed;
+			top: 0;
+			z-index: 1;
+		}
+		i.right {
+           margin-left: -24px;
+        }
+	</style>
 
 </head>
-<body id="bootcards" class="">
-  
-  <div class="container bootcards-container" id="main">
-<div class="row">
 
-	<div class="col-sm-4 col-sm-offset-4 bootcards-cards ">
-		<div class="panel panel-default">
+<body>
+	
+	<a class="github-fork-ribbon" href="https://github.com/FalkorCloud/falkor" title="Fork me on GitHub">Fork me on GitHub</a>
+	
+<div class="container">
+	<div class="row">
+		<div class="col s10 offset-s1 m6 offset-m3  l6 offset-l3">
+			<div class="card">
+				<div class="card-content">
 
-			
-			{% if user and not user.is_anonymous %}
-			  <a>Hello, {{ user.username }}!</a>
-        <br>
-        <a href="/logout">Logout</a>
-			{% else %}
-			<div class="external-logins">
-  			<div class="external-login-button" provider="github">
-    			  <span class="external-login-button-element">
+					<div class="external-logins">
+						<div class="external-login-button" provider="github">
+							<span class="external-login-button-element">
     			    <a style="margin-bottom: 10px" href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
     			      <i class="fa fa-github"></i>
     			      <span class="login-text" style="vertical-align: middle">
     			        <span class="prefix">Sign in with</span>
-    		      	  <span class="suffix">GitHub</span>
-    		      	</span>
-    			    </a>
-    			  </span>
-  			</div>
+							<span class="suffix">GitHub</span>
+							</span>
+							</a>
+							</span>
+						</div>
+					</div>
+					
+					
+					<span class="card-title activator" style="color: #26a69a;" title="About">Soar through the cloud <i class="material-icons tiny">info_outline</i> </span>
+					
+				</div>
+				<div class="card-reveal">
+					<span class="card-title grey-text text-darken-4">Soar through the cloud<i class="material-icons right">close</i></span>
+					<p>
+					We use docker containers to bring custom and isolated workspaces to you that support any framework or programming language.
+					Combined with a browser based IDE, you can take your projects and runtimes anywhere.
+					</p>
+				</div>
 			</div>
-     {% endif %}
-
-
-
-	</div>
-
-</div></div>
-<div class="row">
-	<div class="col-sm-6 col-sm-offset-3 bootcards-cards">
-		<h1>Soar through the cloud</h1>
+		</div>
 	</div>
 </div>
-</div>
-
-
-
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.pjax/1.9.2/jquery.pjax.min.js"></script>
-
-  <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
-
-  <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-
-  <!-- Bootcards JS file -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/js/bootcards.min.js"></script> 
-
-  
-  <script type="text/javascript">
-    //highlight first list group option (if non active yet)
-    if ( $('.list-group a.active').length === 0 ) {
-      $('.list-group a').first().addClass('active');
-    }
-
-    bootcards.init( {
-        offCanvasHideOnMainClick : true,
-        offCanvasBackdrop : true,
-        enableTabletPortraitMode : true,
-        disableRubberBanding : true,
-        disableBreakoutSelector : 'a.no-break-out'
-      });
-
-  </script>
-
-
-
-		<script type="text/javascript" src="/static/three.min.js"></script>
-		<script type="text/javascript" src="/static/Detector.js"></script>
-
-		<script id="vs" type="x-shader/x-vertex">
-
-			varying vec2 vUv;
-
-			void main() {
-
-				vUv = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-			}
-
-		</script>
-
-		<script id="fs" type="x-shader/x-fragment">
-
-			uniform sampler2D map;
-
-			uniform vec3 fogColor;
-			uniform float fogNear;
-			uniform float fogFar;
-
-			varying vec2 vUv;
-
-			void main() {
-
-				float depth = gl_FragCoord.z / gl_FragCoord.w;
-				float fogFactor = smoothstep( fogNear, fogFar, depth );
-
-				gl_FragColor = texture2D( map, vUv );
-				gl_FragColor.w *= pow( gl_FragCoord.z, 20.0 );
-				gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
-
-			}
-
-		</script>
-
-		<script type="text/javascript">
-		
-		$(document).ready(function () {
-
-			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-
-			var container;
-			var camera, scene, renderer;
-			var mesh, geometry, material;
-
-			var mouseX = 0, mouseY = 0;
-			var start_time = Date.now();
-
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
-
-			init();
-
-			function init() {
-
-				container = document.createElement( 'div' );
-				container.id = "background";
-				//document.body.appendChild( container );
-				document.body.insertBefore(container, document.getElementById('main'));
-
-				// Bg gradient
-
-				var canvas = document.createElement( 'canvas' );
-				canvas.width = 32;
-				canvas.height = window.innerHeight;
-
-				var context = canvas.getContext( '2d' );
-
-				var gradient = context.createLinearGradient( 0, 0, 0, canvas.height );
-				gradient.addColorStop(0, "#1e4877");
-				gradient.addColorStop(0.5, "#4584b4");
-
-				context.fillStyle = gradient;
-				context.fillRect(0, 0, canvas.width, canvas.height);
-
-				container.style.background = 'url(' + canvas.toDataURL('image/png') + ')';
-				container.style.backgroundSize = '32px 100%';
-
-				//
-
-				camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 1, 3000 );
-				camera.position.z = 6000;
-
-				scene = new THREE.Scene();
-
-				geometry = new THREE.Geometry();
-
-				var texture = THREE.ImageUtils.loadTexture( '/static/cloud10.png', null, animate );
-				texture.magFilter = THREE.LinearMipMapLinearFilter;
-				texture.minFilter = THREE.LinearMipMapLinearFilter;
-
-				var fog = new THREE.Fog( 0x4584b4, - 100, 3000 );
-
-				material = new THREE.ShaderMaterial( {
-
-					uniforms: {
-
-						"map": { type: "t", value: texture },
-						"fogColor" : { type: "c", value: fog.color },
-						"fogNear" : { type: "f", value: fog.near },
-						"fogFar" : { type: "f", value: fog.far },
-
-					},
-					vertexShader: document.getElementById( 'vs' ).textContent,
-					fragmentShader: document.getElementById( 'fs' ).textContent,
-					depthWrite: false,
-					depthTest: false,
-					transparent: true
-
-				} );
-
-				var plane = new THREE.Mesh( new THREE.PlaneGeometry( 64, 64 ) );
-
-				//for ( var i = 0; i < 8000; i++ ) {
-				for ( var i = 0; i < 1000; i++ ) {
-
-					plane.position.x = Math.random() * 1000 - 500;
-					plane.position.y = - Math.random() * Math.random() * 200 - 15;
-					plane.position.z = 7000+i;
-					plane.rotation.z = Math.random() * Math.PI;
-					plane.scale.x = plane.scale.y = Math.random() * Math.random() * 1.5 + 0.5;
-
-					THREE.GeometryUtils.merge( geometry, plane );
-
-				}
-
-				mesh = new THREE.Mesh( geometry, material );
-				scene.add( mesh );
-
-				mesh = new THREE.Mesh( geometry, material );
-				mesh.position.z = - 8000;
-				scene.add( mesh );
-
-				renderer = new THREE.WebGLRenderer( { antialias: false } );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
-
-				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				window.addEventListener( 'resize', onWindowResize, false );
-
-			}
-
-			function onDocumentMouseMove( event ) {
-
-				mouseX = ( event.clientX - windowHalfX ) * 0.25;
-				mouseY = ( event.clientY - windowHalfY ) * 0.15;
-
-			}
-
-			function onWindowResize( event ) {
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-			}
-
-			function animate() {
-
-				requestAnimationFrame( animate );
-
-				//position = ( ( Date.now() - start_time ) * 0.03 ) % 8000;
-				position = ( ( Date.now() - start_time ) * 0.03 ) % 700;
-
-				camera.position.x += ( mouseX - camera.position.x ) * 0.01;
-				camera.position.y += ( - mouseY - camera.position.y ) * 0.01;
-				camera.position.z = - position + 8000;
-
-				renderer.render( scene, camera );
-
-			}
-});
-		</script>
-		
-		
-
+      
+      
+
+	<div class="container bootcards-container" id="main">
+		<div class="row">
+
+			<div class="col-sm-4 col-sm-offset-4 bootcards-cards ">
+				<div class="panel panel-default">
+
+
+					{% if user and not user.is_anonymous %}
+					<a>Hello, {{ user.username }}!</a>
+					<br>
+					<a href="/logout">Logout</a> {% else %}
+					<div class="external-logins">
+						<div class="external-login-button" provider="github">
+							<span class="external-login-button-element">
+    			    <a style="margin-bottom: 10px" href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
+    			      <i class="fa fa-github"></i>
+    			      <span class="login-text" style="vertical-align: middle">
+    			        <span class="prefix">Sign in with</span>
+							<span class="suffix">GitHub</span>
+							</span>
+							</a>
+							</span>
+						</div>
+					</div>
+					{% endif %}
+
+
+
+				</div>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6 col-sm-offset-3 bootcards-cards">
+				<h1>Soar through the cloud</h1>
+			</div>
+		</div>
+	</div>
+
+    {% include "fragments/login_background.html" %} 
+    
 </body>
-
-
 </html>

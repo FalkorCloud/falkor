@@ -1,0 +1,192 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ workspace.name }}</title>
+  <link rel="stylesheet" href="/static/xterm/xterm.css" />
+  <link rel="stylesheet" href="/static/xterm/addons/fullscreen.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/1.0.0/fetch.min.js"></script>
+  <script src="/static/xterm/xterm.js"></script>
+  <script src="/static/xterm/addons/fit.js"></script>
+  <script src="/static/xterm/addons/fullscreen.js"></script>
+</head>
+
+<body>
+  <style type="text/css">
+    body {
+      font-family: helvetica, sans-serif, arial;
+      font-size: 1em;
+      color: #111;
+    }
+    
+    #terminal-container {
+      /* width: 800px;
+    height: 450px;*/
+      margin: 0 auto;
+      padding: 2px;
+      box-sizing: border-box;
+    }
+    
+    #terminal-container .terminal {
+      background-color: #111;
+      color: #fafafa;
+      padding: 2px;
+    }
+    
+    #terminal-container .terminal:focus .terminal-cursor {
+      background-color: #fafafa;
+    }
+    
+    .resizable {
+      position: relative;
+    }
+    
+    .resizer {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      cursor: se-resize;
+    }
+  </style>
+  <div>
+    <div id="terminal-title"></div>
+    <div id="terminal-container"></div>
+  </div>
+  <div id="terminal-options">
+    <div>Options</div>
+    <label><input type="checkbox" id="option-cursor-blink"> cursorBlink</label>
+  </div>
+  <script defer>
+    var term,
+      protocol,
+      socketURL,
+      socket,
+      pid,
+      charWidth,
+      charHeight;
+
+    var terminalContainer = document.getElementById('terminal-container'),
+      optionElements = {
+        cursorBlink: document.querySelector('#option-cursor-blink')
+      };
+
+
+    optionElements.cursorBlink.addEventListener('change', createTerminal);
+
+    createTerminal();
+
+/*
+    terminalContainer.className = terminalContainer.className + ' resizable';
+    var resizer = document.createElement('div');
+    resizer.className = 'resizer';
+    terminalContainer.appendChild(resizer);
+    resizer.addEventListener('mousedown', initDrag, false);
+
+    var startX, startY, startWidth, startHeight;
+
+    function initDrag(e) {
+      startX = e.clientX;
+      startY = e.clientY;
+      startWidth = parseInt(document.defaultView.getComputedStyle(terminalContainer).width, 10);
+      startHeight = parseInt(document.defaultView.getComputedStyle(terminalContainer).height, 10);
+      document.documentElement.addEventListener('mousemove', doDrag, false);
+      document.documentElement.addEventListener('mouseup', stopDrag, false);
+    }
+
+    function doDrag(e) {
+      terminalContainer.style.width = (startWidth + e.clientX - startX) + 'px';
+      terminalContainer.style.height = (startHeight + e.clientY - startY) + 'px';
+    }
+
+    function stopDrag(e) {
+      document.documentElement.removeEventListener('mousemove', doDrag, false);
+      document.documentElement.removeEventListener('mouseup', stopDrag, false);
+      term.fit();
+    }
+*/
+
+    function resize()
+    {
+        var heights = window.innerHeight - document.getElementById('terminal-options').clientHeight - 40;
+        terminalContainer.style.height = heights + "px";
+        term.fit();
+    }
+    resize();
+    
+    window.addEventListener('resize', function() {
+      resize();
+    }, false);
+
+
+
+    function createTerminal() {
+      // Clean terminal
+      while (terminalContainer.children.length) {
+        terminalContainer.removeChild(terminalContainer.children[0]);
+      }
+      term = new Terminal({
+        cursorBlink: optionElements.cursorBlink.checked
+      });
+      
+      protocol = (location.protocol === 'https:') ? 'wss://' : 'ws://';
+      socketURL = protocol + location.hostname + ((location.port) ? (':' + location.port) : '') + '/workspace/{{ workspace.id }}/1';
+
+      term.open(terminalContainer);
+
+      var initialGeometry = term.proposeGeometry(),
+        cols = initialGeometry.cols,
+        rows = initialGeometry.rows;
+
+      charWidth = Math.ceil(term.element.offsetWidth / cols);
+      charHeight = Math.ceil(term.element.offsetHeight / rows);
+      socket = new WebSocket(socketURL);
+      socket.onopen = runRealTerminal;
+      socket.onclose = function(e) {
+        console.log('onclose', e);
+      };
+      socket.onerror = function(e) {
+        console.log('onerror', e);
+      };
+
+      socket.onmessage = function(e) {
+
+        var reader = new FileReader();
+        reader.addEventListener("loadend", function() {
+          //console.log(e, reader.result); 
+          term.write(reader.result);
+        });
+        reader.readAsBinaryString(e.data);
+      };
+    }
+
+
+    function runRealTerminal() {
+      //term.attach(socket);
+      term.on('data', function(data) {
+        socket.send(data);
+      });
+      term.on('title', function(data) {
+        document.getElementById('terminal-title').innerHTML = data;
+      });
+      term.on('resize', function(size) {
+
+        var cols = size.cols,
+          rows = size.rows;
+        if (socket) {
+          socket.send('@@RESIZE@@' + cols + ':' + rows);
+          console.log('@@RESIZE@@' + cols + ':' + rows);
+        }
+
+      });
+      socket.send('@@RESIZE@@' + term.cols + ':' + term.rows);
+      term._initialized = true;
+      
+      window.addEventListener("beforeunload", function(e){
+        //socket.send('exit\n');
+      }, false);
+    }
+  </script>
+</body>
+
+</html>

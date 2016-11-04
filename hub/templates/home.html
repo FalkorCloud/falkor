@@ -1,78 +1,45 @@
-{% extends "base/base.html" %}
-
-{% load raw_include %}
+{% extends "base/base.html" %} 
+{% load raw_include %} 
 
 {% block content %}
 <script id="workspace_details" type="text/x-handlebars-template">
-{% raw_include "fragments/workspace.html"%}
+	{% raw_include "fragments/workspace.html"%}
 </script>
 
 <script id="template" type="text/x-handlebars-template">
-{% verbatim %}
-  <a data-workspace="{{ workspace_.id }}" class=" {% if workspace_.name ==  workspace.name %}active{% endif %} list-group-item pjax" href="/workspaces/{{ workspace_.id }}">
- 			
-		<div class="row">
-			<div class="col-sm-6">
-				<i class="fa fa-3x fa-folder-open-o pull-left"></i>
-				<h4 class="list-group-item-heading">{{ workspace_.name }}</h4>
-				<p class="list-group-item-text status">{{ workspace_.state.status }}</p>
-			</div>
-			<div class="col-sm-6">
-				<p class="list-group-item-text">{{ workspace_.created_at }}</p>
-				<p class="list-group-item-text">{{ workspace_.state.IPAddress }}</p>
-			</div>
-		</div>
-		
-	</a>
-{% endverbatim %}
+	{% verbatim %}
+	<li data-workspace="{{ workspace_.id }}" href="/workspaces/{{ workspace_.id }}" class="collection-item avatar">
+		<i class="material-icons circle {{#if workspace_.running}}green{{else}}red{{/if}}">insert_chart</i>
+		<span class="title">{{ workspace_.name }}</span>
+		<p>{{ workspace_.state.status }}
+			<br>  {{#if workspace_.state.IPAddress}} {{ workspace_.state.IPAddress }} {{else}}-{{/if}}
+		</p>
+		<a href="#!" class="secondary-content"><i class="material-icons">send</i></a>
+	</li>
+	{% endverbatim %}
 </script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-<script type="text/javascript" src="/static/websocket.js"></script>
-<script type="text/javascript">
-var request = {
-	"scheme": "{{ request.scheme }}",
-	"get_host": "{{ request.get_host }}",
-};
-</script>
-<script type="text/javascript" src="/static/main.js"></script>
-<script type="text/javascript" src="/static/term.js"></script>
 
 
+<div style="position: relative; width: 100%; overflow:hidden;">
+	<div style="width: 200%;">
+		<ul id="workspace-list" class="collection with-header" style="float: left; width: 50%;">
+			<li class="collection-header">
+				<input type="text" class="form-control live-search-box" placeholder="Search Workspaces...">
+			</li>
+			<div id="workspaces" class="live-search-list">
+				<div class="progress">
+					<div class="indeterminate"></div>
+				</div>
+			</div>
+		</ul>
 
-<div class="col-sm-6 bootcards-list" id="list" data-title="Workspaces">		
-	<div class="panel panel-default">					
-		<div class="panel-body">
-			<div class="search-form">
-				<div class="row">
-				    <div class="col-xs-9">
-				      <div class="form-group">
-					      <input type="text" class="form-control live-search-box" placeholder="Search Workspaces...">
-					      <i class="fa fa-search"></i>
-				      </div>
-				    </div>
-				    <div class="col-xs-3">
-						<a class="btn btn-primary btn-block" href="#" data-toggle="modal" data-target="#editModal">
-							<i class="fa fa-plus"></i> 
-							<span>Add</span>
-						</a>
-				    </div>
-				</div>						    
-			</div>				
+		<div id="workspace-detail" class="" style="float: left; width: 50%; left: 0;">
+			
 		</div>
-		<div id="workspaces" class="list-group live-search-list">
-		</div>
-		<div class="panel-footer">
-		</div>					
 	</div>
 </div>
-
-<div class="col-sm-6 bootcards-cards">
-	<div id="workspace-detail">
-	</div>
-</div>	
-{% endblock %}
-
+{% endblock %} 
 
 {% block modals %}
-	{% include "fragments/add_workspace.html" %}
+{% include "fragments/add_workspace.html" %} 
 {% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Project, Container
+from .models import Project, EditorType
 from django.contrib.auth.models import User
 
 from guardian.admin import GuardedModelAdmin
@@ -59,4 +59,4 @@ class WorkspaceAdmin(GuardedModelAdmin):
     claim_workspaces.short_description = "Claim workspaces"        
 
 admin.site.register(Project, WorkspaceAdmin)
-admin.site.register(Container)
+admin.site.register(EditorType)

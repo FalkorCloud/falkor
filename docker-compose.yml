@@ -62,6 +62,19 @@ services:
             channels:
             backend: 
             
+    dockerexecworker:
+        depends_on:
+            - redis
+        restart: always
+        build: ./hub
+        environment:
+            - "POSTGRES=true"
+            - "REDIS=true"
+        command: python manage.py dockerexecworker
+        networks:
+            channels:
+            backend:
+            
     web-static:
       build: ./hub
       volumes:

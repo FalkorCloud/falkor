@@ -1,8 +1,30 @@
 from django.db import models
+from autoslug import AutoSlugField
 from django.contrib.auth.models import User
 
+class EditorType(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    slug = AutoSlugField(populate_from='name')
+    image = models.CharField(max_length=200)
+    urlPrefix = models.CharField(max_length=200, blank=True)
+    urlSuffix = models.CharField(max_length=200, blank=True)
+    settings = models.TextField(null=True, blank=True)
+    
+    def __unicode__(self):
+        from utilities import docker_cli
+        cli = docker_cli()
+        try:
+            img = cli.inspect_image(self.image)
+            image = img['Id'] + ' ' + str(img['RepoTags'])
+        except Exception as e:
+            print e
+            image = 'Missing'
+        return '{} [image: {}]'.format(self.name, image)
+
 class Project(models.Model):
-    name = models.SlugField(max_length=200)
+    editor_type = models.ForeignKey(EditorType)
+    name = models.CharField(max_length=200)
+    slug = AutoSlugField(populate_from='name', null=True, blank=True)
     user = models.ForeignKey(User, related_name='created_projects')
     container_id = models.CharField(max_length=200, null=True, blank=True)
     
@@ -17,12 +39,15 @@ class Project(models.Model):
         cli = docker_cli()
         try:
             container = cli.inspect_container(self.container_id)
-            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.container_id, str(container['NetworkSettings']['Networks'].keys()))
+            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, str(container['NetworkSettings']['Networks'].keys()))
         except:
-            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.container_id, 'Missing')
+            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, 'Missing')
         
-    def url(self):
-        return '{0}.workspaces'.format(self.name)
+    def urlPrefix(self):
+        return self.editor_type.urlPrefix.format(**vars(self))
+    
+    def urlSuffix(self):
+        return self.editor_type.urlSuffix.format(**vars(self))
         
     
 class Container(models.Model):

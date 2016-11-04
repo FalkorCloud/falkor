@@ -1,30 +1,31 @@
-<div class="modal fade in" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModal" aria-hidden="true" style="display: none; padding-right: 21px;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form class="form-horizontal add_workspace">
-            	{% csrf_token %}
-                <div class="modal-header">
-
-                    <div class="btn-group pull-left">
-                        <button class="btn btn-danger" data-dismiss="modal">Cancel</button>
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h4>New Workspace</h4>
+        <div class="row">
+            <form class="col s12 add_workspace">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input name="name" placeholder="Workspace Name" id="workspace_name" type="text" class="validate">
+                        <label for="workspace_name">Name</label>
                     </div>
-
-                    <div class="btn-group pull-right">
-                        <button id="add_workspace_button" class="btn btn-success" data-dismiss="modal1">Add</button>
-                    </div>
-                    <h3 class="modal-title">New Project</h3>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="col-xs-3 control-label">Name</label>
-                        <div class="col-xs-9">
-                            <input type="text" name="name" class="form-control" placeholder="Project name" value="">
-                        </div>
-                    </div>
+                <div class="row">
+    
+<div class="input-field col s6">
+    <select name="editorType">
+        {% for editor_type in editorTypes %}
+        <option value="{{ editor_type.slug }}">{{ editor_type.name }}</option>
+        {% endfor %}
+    </select>
+    <label>Editor</label>
+</div>
+  
                 </div>
             </form>
-            <div class="modal-footer">
-            </div>
         </div>
+    </div>
+    <div class="modal-footer">
+        <a id="add_workspace_button" href="#!" class="modal-action modal-close1 waves-effect waves-green btn-flat">Create</a>
     </div>
 </div>

@@ -1,0 +1,26 @@
+[
+{
+  "model": "falkor.editortype",
+  "pk": 1,
+  "fields": {
+    "name": "Cloud9",
+    "slug": "cloud9",
+    "image": "falkor/cloud9-docker",
+    "urlPrefix": "{slug}.workspaces.",
+    "urlSuffix": "",
+    "settings": ""
+  }
+},
+{
+  "model": "falkor.editortype",
+  "pk": 2,
+  "fields": {
+    "name": "Vim",
+    "slug": "vim",
+    "image": "falkor/vim",
+    "urlPrefix": "",
+    "urlSuffix": "{_user_cache.username}/{slug}/terminal/",
+    "settings": ""
+  }
+}
+]

@@ -1,151 +1,105 @@
-<div id="companyCard">
-	<div class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<h3 class="panel-title pull-left">Workspace Details</h3>
-			
-			{{#if workspace.running}}
-			<a class="btn btn-primary pull-right" target="_blank" href="{{ request.scheme }}://{{ workspace.url }}.{{ request.get_host }}">
-				<i class="fa fa-pencil"></i>
-				<span>Open</span>
-			</a>
-			{{/if}}
-		</div>
-		<div class="list-group">
-			<div class="list-group-item">
-				<i class="fa fa-2x fa-building-o pull-left"></i>
-				<label>Name</label>
-				<h4 class="list-group-item-heading">{{ workspace.name }}</h4>
+<div class="row">
+	<div class="col s12">
+		<div class="card horizontal">
+			<div class="card-stacked">
+				<div class="card-content">
+					{{#if workspace.running}}
+					<a target="_blank" href="{{ request.scheme }}://{{ workspace.urlPrefix }}{{ request.get_host }}/{{ workspace.urlSuffix }}" class="waves-effect waves-light btn right"><i class="material-icons right">cloud</i>Open</a> {{/if}}
+				</div>
+				<div class="card-action">
+					<div class="row">
+						<div class="col s12">
+							<div class="row">
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.name }}" disabled>
+									<label for="last_name" class="active">Name</label>
+								</div>
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.slug }}" disabled>
+									<label for="last_name" class="active">Slug</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.created_at }}" disabled>
+									<label for="last_name" class="active">Created</label>
+								</div>
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.modified_at }}" disabled>
+									<label for="last_name" class="active">Modified</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.editor_type.name }}" disabled>
+									<label for="last_name" class="active">Editor</label>
+								</div>
+								<div class="input-field col s6">
+									<input id="last_name" type="text" value="{{ workspace.state.IPAddress }}" disabled>
+									<label for="last_name" class="active">IpAddress</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="card-action">
+					<div class="row">
+						<div class="input-field col s6">
+							<input id="last_name" type="text" value="{{ workspace.state.status }}" disabled>
+							<label for="last_name" class="active">State</label>
+						</div>
+						<div class="workspace-controls col s1 right" data-workspace-id="{{ workspace.id }}">
+							{{#if workspace.running}}
+							<button class="btn-floating red" data-command="stop"><i class="material-icons">stop</i></button>
+							{{else}}
+							<button class="btn-floating green" data-command="start"><i class="material-icons">play_arrow</i></button>
+							{{/if}}
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="panel-footer">
-			<div class="btn-group pull-right workspace-controls" data-workspace-id="{{ workspace.id }}">
-			  {{#if workspace.running}}
-			     <button type="button" class="btn btn-default" data-command="stop"><i class="fa fa-stop"></i></button>
-			  {{else}}
-			     <button type="button" class="btn btn-default" data-command="start"><i class="fa fa-play"></i></button>
-			  {{/if}}
-			</div>
-		</div>		
 	</div>
-	
-	
-	<div class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<h3 class="panel-title pull-left">Endpoints</h3>
-		</div>					
-		<div class="list-group">
-			{{!--
-			{% for endpoint in workspace.endpoints %}
-			 	
-				<a class="list-group-item pjax" target="_blank" href="{{ request.scheme }}://{{ endpoint.name }}.endpoints.{{ request.get_host }}">
-					<i class="fa fa-2x pull-left fa-plug"></i>
-					<h4 class="list-group-item-heading">{{ endpoint.program }}</h4>
-					<p class="list-group-item-text">{{ endpoint.protocol }} {{ endpoint.port }}</p>
-				</a>
-			{% endfor %}
-			--}}
-			
-			{{#each workspace.endpoints}}
-		      <a class="list-group-item pjax" target="_blank" href="{{ @root.request.scheme }}://{{ this.name }}.endpoints.{{ @root.request.get_host }}">
-					<i class="fa fa-2x pull-left fa-plug"></i>
-					<h4 class="list-group-item-heading">{{ this.program }}</h4>
-					<p class="list-group-item-text">{{ this.protocol }} {{ this.port }}</p>
-				</a>
-		    {{/each}}
-		</div>
-		<div class="panel-footer">
-		</div>			
-	</div>
-	
-	<div class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<h3 class="panel-title pull-left">Terminal</h3>
-		</div>					
-		<div id="terminal"></div>
-		<div class="panel-footer">
-		</div>			
-	</div>
-	
-	<div class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<h3 class="panel-title pull-left">Files</h3>
-		</div>					
-		<div class="list-group">
-			{{#each workspace.files}}
-				{{#if this.is_file}}
-					<div class="list-group-item">{{ this.name }} <span class="pull-right" style="margin-right: 20px">{{ this.size }}</span></div>
-				{{else}}
-					<a class="list-group-item">{{ this.name }} <span class="pull-right" style="margin-right: 20px">{{ this.size }}</span></a>
-				{{/if}}
-			{{/each}}
-		</div>
-		<div class="panel-footer">
-		</div>			
-	</div>
-	
-	<div class="panel panel-default">
-		<div class="panel-heading clearfix">
-			<h3 class="panel-title pull-left">Info</h3>
-		</div>					
-		<div class="list-group">
-			<div class="list-group-item">
-				<h4 class="list-group-item-heading"><pre>{{ workspace.info }}</pre></h4>
-			</div>
-		</div>
-		<div class="panel-footer">
-		</div>			
-	</div>
-				
-				
+</div>
 </div>
 
-<style>
-  .terminal {
-   /* float: left;*/
-    border: #000 solid 5px;
-    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
-    font-size: 11px;
-    color: #f0f0f0;
-    background: #000;
-  }
-</style>
-<script type="text/javascript">
-  //https://github.com/rainforestapp/Docker-Terminal/blob/master/docker_terminal.js
-  var term = new Terminal(80,8);
-  term.open();
-  console.log(term.element);
-  
-  $('body').click(function () {
-  	Terminal.focus = null;
-  });
-  
-  
-  $('#terminal').empty().append(term.element);
+<div class="row">
+	<div class="col s12">
+		<div class="card">
+			<div class="collection">
+				{{#each workspace.endpoints}}
+				<div class="collection-item avatar">
+					<i class="small material-icons circle">http</i>
+					<span class="title">{{ this.program }}</span>
+					<p>{{ this.protocol }} {{ this.port }}
+					</p>
+					<a target="_blank" href="{{ @root.request.scheme }}://{{ this.name }}.endpoints.{{ @root.request.get_host }}" class="secondary-content"><i class="material-icons">send</i></a>
+				</div>
+				{{else}}
+                    <div class="collection-item">No endpoints</div>
+				{{/each}}
+			</div>
+		</div>
+	</div>
+</div>
 
-  var wsUri = "ws://falkor.workspaces."+window.location.host+"/attach/ws";
+<div class="col s12">
+	<div class="card horizontal">
+		<div class="card-stacked">
+			<div class="card-content">
+				<a class="modal-trigger waves-effect waves-teal btn-flat grey lighten-3 right" href="#workspaceInfo">Info</a>
+			</div>
+		</div>
+	</div>
+</div>
 
-  var websocket = new WebSocket(wsUri);
-  websocket.onopen = function(evt) { onOpen(evt) };
-  websocket.onclose = function(evt) { onClose(evt) };
-  websocket.onmessage = function(evt) { onMessage(evt) };
-  websocket.onerror = function(evt) { onError(evt) };
 
-  term.on('data', function(data) {
-    websocket.send(data);
-  });
 
-  function onOpen(evt) { 
-    term.write("Session started");
-  }  
-
-  function onClose(evt) { 
-    term.write("Session terminated");
-  }  
-
-  function onMessage(evt) { 
-    term.write(evt.data);
-  }  
-
-  function onError(evt) { 
-  }  
-</script>
+<div id="workspaceInfo" class="modal bottom-sheet">
+	<div class="modal-content">
+		<pre>{{ workspace.info }}</pre>
+	</div>
+	<div class="modal-footer">
+		<a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+	</div>
+</div>

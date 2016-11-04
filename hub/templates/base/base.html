@@ -2,68 +2,95 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge"> 
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}Falkor{% endblock %}</title>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-  <link href="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/css/bootcards-desktop.min.css" rel="stylesheet" type="text/css">
-  <link href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
- 
-  <script>var isDesktop = true;</script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <style type="text/css">
-    .navbar-brand {
-      padding: 0;
-    }
-    
-    .btn-group .btn i {
-      margin-right: 0px;
-    }
-    
-    #notifications.error {
-      color: #a94442;
-    }
-    
-    #notifications.warning {
-      color: #31708f;
-    }
-    
-    #notifications.info {
-      color: #3c763d;
-    }
+.dark-primary-color    { background: #0288D1 !important; }
+.default-primary-color { background: #03A9F4; }
+.light-primary-color   { background: #B3E5FC; }
+.text-primary-color    { color: #FFFFFF; }
+.accent-color          { background: #FF5252; }
+.primary-text-color    { color: #212121; }
+.secondary-text-color  { color: #757575; }
+.divider-color         { border-color: #BDBDBD; }
+
+.collection-item {
+  cursor: pointer;
+}
+
+.collection .collection-item.avatar {
+    min-height: initial;
+}
+
+input:not([type]):disabled,
+input:not([type])[readonly="readonly"],
+input[type=text]:disabled,
+input[type=text][readonly="readonly"],
+input[type=password]:disabled,
+input[type=password][readonly="readonly"],
+input[type=email]:disabled,
+input[type=email][readonly="readonly"],
+input[type=url]:disabled,
+input[type=url][readonly="readonly"],
+input[type=time]:disabled,
+input[type=time][readonly="readonly"],
+input[type=date]:disabled,
+input[type=date][readonly="readonly"],
+input[type=datetime]:disabled,
+input[type=datetime][readonly="readonly"],
+input[type=datetime-local]:disabled,
+input[type=datetime-local][readonly="readonly"],
+input[type=tel]:disabled,
+input[type=tel][readonly="readonly"],
+input[type=number]:disabled,
+input[type=number][readonly="readonly"],
+input[type=search]:disabled,
+input[type=search][readonly="readonly"],
+textarea.materialize-textarea:disabled,
+textarea.materialize-textarea[readonly="readonly"] {
+  color: rgba(0, 0, 0, 1);
+  border-bottom: 0px solid #9e9e9e;
+  margin: 0;
+}
+
+.card .row {
+  margin-bottom: 0;
+}
   </style>
 </head>
-<body id="bootcards" class="">
+<body>
   {% include "base/header.html"%}
   
-  <div class="container bootcards-container" id="main">
-	<div class="row">
+  <div class="container" id="main">
 			{% block content %}{% endblock %}
-	</div>
   </div>
   {% include "base/footer.html"%}
 
   
   {% block modals %}{% endblock %}
   
-  
-  <!-- Load the required JavaScript libraries -->
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
 
-  <!-- Bootcards JS file -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/bootcards/1.1.2/js/bootcards.min.js"></script> 
+<script type="text/javascript">
+  var request = {
+    "scheme": "{{ request.scheme }}",
+    "get_host": "{{ request.get_host }}",
+  };
+</script>
 
-  
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
   <script type="text/javascript">
-    bootcards.init( {
-        offCanvasHideOnMainClick : true,
-        offCanvasBackdrop : true,
-        enableTabletPortraitMode : true,
-        disableRubberBanding : true,
-        disableBreakoutSelector : 'a.no-break-out'
-      });
+    $(document).ready(function(){
+       $('.modal').modal();
+       $('select').material_select();
+    });
   </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+  <script type="text/javascript" src="/static/websocket.js"></script>
+  <script type="text/javascript" src="/static/main.js"></script>
 </body>
 </html>

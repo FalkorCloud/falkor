@@ -32,11 +32,6 @@ Or in development
 ```
 DOMAIN_NAME="us2.peragro.org"  SECRET="somesecret" docker-compose up --build --force-recreate
 ```
-Share the docker socket with the web container
-```
-web_ip=$(docker inspect --format "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}" falkor_web_1)
-sudo socat -d -d TCP-L:2375,fork,range=$web_ip/32 UNIX:/var/run/docker.sock
-```
 Setup the db
 ```
 docker-compose exec web-worker python manage.py migrate
@@ -103,4 +98,10 @@ https://github.com/c9/core/issues/237#issuecomment-175899228
 
 npm config get production
 npm config set -g production false
+
+
+https://github.com/scrooloose/vimfiles
+
+
+tail -f /var/log/something to keep it running
 ```

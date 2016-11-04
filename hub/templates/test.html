@@ -1,0 +1,72 @@
+<html lang="en">
+    <head>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+<script type="text/javascript" src="/static/term.js"></script>
+<script type="text/javascript" src="/static/websocket.js"></script>
+<script type="text/javascript">
+var request = {
+	"scheme": "{{ request.scheme }}",
+	"get_host": "{{ request.get_host }}",
+};
+</script>
+    </head>
+    <body>
+<div id="terminal"></div>        
+        
+<style>
+  .terminal {
+   /* float: left;*/
+    border: #000 solid 5px;
+    font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+    font-size: 11px;
+    color: #f0f0f0;
+    background: #000;
+  }
+</style>
+<script type="text/javascript">
+  //https://github.com/rainforestapp/Docker-Terminal/blob/master/docker_terminal.js
+  var term = new Terminal(80,24);
+  term.open();
+  console.log(term.element);
+  /*
+  $('body').click(function () {
+  	Terminal.focus = null;
+  });
+  */
+  
+  
+  $('#terminal').empty().append(term.element);
+
+  var wsUri = "ws://"+window.location.host+"/workspace/2/1";
+
+  var websocket = new WebSocket(wsUri);
+  websocket.onopen = function(evt) { onOpen(evt) };
+  websocket.onclose = function(evt) { onClose(evt) };
+  websocket.onmessage = function(evt) { onMessage(evt) };
+  websocket.onerror = function(evt) { onError(evt) };
+
+  term.on('data', function(data) {
+      console.log('typing')
+    websocket.send(data);
+  });
+
+  function onOpen(evt) { 
+    //term.write("Session started\n");
+    websocket.send('@@RESIZE@@'+term.cols+':'+term.rows);
+  }  
+
+  function onClose(evt) { 
+    term.write("Session terminated");
+  }  
+
+  function onMessage(evt) { 
+    term.write(evt.data);
+  }  
+
+  function onError(evt) { 
+  }  
+</script>
+        
+    </body>
+</html>
