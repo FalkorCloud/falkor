@@ -24,7 +24,7 @@ class EditorType(models.Model):
 class Project(models.Model):
     editor_type = models.ForeignKey(EditorType)
     name = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='name', null=True, blank=True, always_update=True, editable=True)
+    slug = AutoSlugField(populate_from=lambda x: x.user.username+'-'+x.name, null=True, blank=True, always_update=True, editable=True)
     user = models.ForeignKey(User, related_name='created_projects')
     container_id = models.CharField(max_length=200, null=True, blank=True)
     
@@ -44,9 +44,9 @@ class Project(models.Model):
         cli = docker_cli()
         try:
             container = cli.inspect_container(self.container_id)
-            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, str(container['NetworkSettings']['Networks'].keys()))
+            return u'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, str(container['NetworkSettings']['Networks'].keys()))
         except:
-            return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, 'Missing')
+            return u'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, 'Missing')
      
     @property   
     def urlPrefix(self):
