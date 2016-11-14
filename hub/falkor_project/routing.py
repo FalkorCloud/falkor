@@ -2,6 +2,8 @@ from channels.routing import route
 from falkor.consumers import ws_add, ws_keepalive, ws_message, ws_disconnect, docker_events, select_workspace, control_workspace, add_workspace
 
 from falkor import terminal_consumers
+from falkor import user_consumers
+from falkor import workspace_consumers
 
 channel_routing = [
     
@@ -15,9 +17,13 @@ channel_routing = [
     route("websocket.connect", ws_add),
     route("websocket.keepalive", ws_keepalive),
     
-    
     route("websocket.events", select_workspace, event=r'workspaces.select'),
     route("websocket.events", control_workspace, event=r'workspaces.control'),
     route("websocket.events", add_workspace, event=r'workspaces.add'),
+    
+    route("websocket.events", user_consumers.autocomplete, event=r'users.autocomplete'),
+    
+    route("websocket.events", workspace_consumers.shares_edit, event=r'workspaces.shares.add'),
+    
     route('docker_events', docker_events),
 ]

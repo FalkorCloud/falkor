@@ -1,12 +1,18 @@
+{{#if workspace.permissions.can_open_ide}}
+<div title="{{#if workspace.running}}Open workspace{{else}}The workspace needs to be running{{/if}}" 
+     class="fixed-action-btn show-on-detail" style="bottom: initial; ">
+  <a target="_blank" href="{{ request.scheme }}://{{ workspace.urlPrefix }}{{ request.get_host }}/{{ workspace.urlSuffix }}" 
+     class="btn-floating btn-large red {{#unless workspace.running}}disabled{{/unless}}">
+    <i class="large material-icons">cloud</i>
+  </a>
+</div>
+{{/if}}
+
 <div class="row">
 	<div class="col s12">
-		<div class="card horizontal">
-			<div class="card-stacked">
-				<div class="card-content">
-					{{#if workspace.running}}
-					<a target="_blank" href="{{ request.scheme }}://{{ workspace.urlPrefix }}{{ request.get_host }}/{{ workspace.urlSuffix }}" class="waves-effect waves-light btn right"><i class="material-icons right">cloud</i>Open</a> {{/if}}
-				</div>
-				<div class="card-action">
+		<div class="card">
+			<div class="collection">
+				<div class="collection-item">
 					<div class="row">
 						<div class="col s12">
 							<div class="row">
@@ -34,28 +40,30 @@
 									<input id="last_name" type="text" value="{{ workspace.editor_type.name }}" disabled>
 									<label for="last_name" class="active">Editor</label>
 								</div>
-								<div class="input-field col s6">
+								<div class="input-field col s5">
 									<input id="last_name" type="text" value="{{ workspace.state.IPAddress }}" disabled>
 									<label for="last_name" class="active">IpAddress</label>
+								</div>
+								<div class="input-field col s1" style="padding: 0;">
+									<a class="modal-trigger waves-effect waves-light btn-flat right" href="#workspaceInfo">More</a>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="card-action">
-					<div class="row">
-						<div class="input-field col s6">
-							<input id="last_name" type="text" value="{{ workspace.state.status }}" disabled>
-							<label for="last_name" class="active">State</label>
+				<div class="collection-header">
+						<div class="left" style="height: 36px; line-height: 36px; padding: 0 2rem;">
+							{{ workspace.state.status }} <!--{{ workspace.info.State.StartedAt }}-->
 						</div>
-						<div class="workspace-controls col s1 right" data-workspace-id="{{ workspace.id }}">
+						{{#if workspace.permissions.can_start_stop}}
+						<div class="workspace-controls right" data-workspace-id="{{ workspace.id }}">
 							{{#if workspace.running}}
-							<button class="btn-floating red" data-command="stop"><i class="material-icons">stop</i></button>
+							<button title="Stop the workspace" class="waves-effect waves-light btn-flat right" data-command="stop"><i class="material-icons large">stop</i></button>
 							{{else}}
-							<button class="btn-floating green" data-command="start"><i class="material-icons">play_arrow</i></button>
+							<button title="Start the workspace" class="waves-effect waves-light btn-flat right" data-command="start"><i class="material-icons large">play_arrow</i></button>
 							{{/if}}
 						</div>
-					</div>
+						{{/if}}
 				</div>
 			</div>
 		</div>
@@ -68,13 +76,13 @@
 		<div class="card">
 			<div class="collection">
 				{{#each workspace.endpoints}}
-				<div class="collection-item avatar">
+				<a class="collection-item avatar" target="_blank" href="{{ @root.request.scheme }}://{{ this.name }}.endpoints.{{ @root.request.get_host }}">
 					<i class="small material-icons circle">http</i>
 					<span class="title">{{ this.program }}</span>
 					<p>{{ this.protocol }} {{ this.port }}
 					</p>
-					<a target="_blank" href="{{ @root.request.scheme }}://{{ this.name }}.endpoints.{{ @root.request.get_host }}" class="secondary-content"><i class="material-icons">send</i></a>
-				</div>
+					<span class="secondary-content"><i class="material-icons">send</i></span>
+				</a>
 				{{else}}
                     <div class="collection-item">No endpoints</div>
 				{{/each}}
@@ -83,23 +91,90 @@
 	</div>
 </div>
 
-<div class="col s12">
-	<div class="card horizontal">
-		<div class="card-stacked">
-			<div class="card-content">
-				<a class="modal-trigger waves-effect waves-teal btn-flat grey lighten-3 right" href="#workspaceInfo">Info</a>
+<div class="row">
+	<div class="col s12">
+		<div class="card">
+			<div class="collection">
+				
+				{{#each workspace.shares}}
+				<div class="collection-item avatar" data-username="{{ this.username }}">
+					<img src="https://github.com/{{ this.username }}.png?size=42" alt="" class="circle" />
+					<span class="title">{{ this.username }}</span>
+					<p class="permissions">
+					{{#if this.permissions.can_open_ide }} <i class="material-icons tiny">cloud</i> {{/if}}
+					{{#if this.permissions.can_start_stop }} <i class="material-icons tiny">settings_power</i> {{/if}}
+					{{#if this.permissions.can_edit_shares }} <i class="material-icons tiny">supervisor_account</i> {{/if}}
+					</p>
+					{{#if this.owner }}
+					<span class="secondary-content">Owner</span>
+					{{else}}
+					  {{#if ../workspace.permissions.can_edit_shares }} 
+					    <a href="#shareRemove" class="modal-trigger secondary-content"><i class="material-icons">delete</i></a>
+					  {{/if}}
+					{{/if}}
+				</div>
+				{{/each}}
+				
+				{{#if workspace.permissions.can_edit_shares }} 
+				<div class="collection-header">
+				  <a href="#shareAdd" class="modal-trigger waves-effect waves-light btn-flat right"><i class="material-icons large">add</i></a>
+				  <div style="clear: both"></div>
+				</div>
+				{{/if}}
+				
 			</div>
 		</div>
 	</div>
 </div>
 
 
-
 <div id="workspaceInfo" class="modal bottom-sheet">
 	<div class="modal-content">
-		<pre>{{ workspace.info }}</pre>
+		<pre>{{ workspace.info_str }}</pre>
 	</div>
 	<div class="modal-footer">
 		<a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
 	</div>
 </div>
+
+
+<div id="shareAdd" class="modal">
+	<div class="modal-content">
+		<h4>New Share</h4>
+		
+            <form class="col s12 add_share" autocomplete="off">
+            	<input type="hidden" name="workspace_id" value="{{ workspace.id }}">
+            	<input type="hidden" name="permissions" value="can_open_ide">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input name="username" placeholder="Username" id="user_name" type="text" class="validate">
+                        <label for="user_name">Username</label>
+                    </div>
+                </div>
+            </form>
+		
+	</div>
+	<div class="modal-footer">
+		<a id="add_share_button" href="#!" class="modal-action modal-close1 waves-effect waves-green btn-flat">Add</a>
+	</div>
+</div>
+
+
+<div id="shareRemove" class="modal">
+	<div class="modal-content">
+		<h4>Remove Share?</h4>
+		
+            <form class="col s12 remove_share" autocomplete="off">
+            	<input type="hidden" name="workspace_id" value="{{ workspace.id }}">
+            </form>
+		
+	</div>
+	<div class="modal-footer">
+		<a id="remove_share_button" href="#!" class="modal-action modal-close1 waves-effect waves-green btn-flat">Remove</a>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$('#user_name').autocompleteWS();
+</script>
+

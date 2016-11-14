@@ -1,6 +1,8 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from django.contrib.auth import views as auth_views
+
 from falkor import views
 
 urlpatterns = [
@@ -10,6 +12,6 @@ urlpatterns = [
     url(r'^$', views.home),
     url(r'^(?P<user>[-\w]+)/(?P<workspace>[-\w]+)/terminal/$', views.terminal),
     url(r'^logout/$', views.logout),
-    
+    url('^django-login/$', auth_views.login, name='default-login'),
     url(r'^workspaces/$', views.workspaces),
 ]

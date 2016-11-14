@@ -15,7 +15,7 @@ var workspace_details_template = document.getElementById('workspace_details').in
 var workspace_details = Handlebars.compile(workspace_details_template);
 
 function update_search_terms() {
-	$('.live-search-list li').each(function(){
+	$('.live-search-list .collection-item').each(function(){
 		$(this).attr('data-search-term', $(this).find('.title').text().toLowerCase());
 	});
 }
@@ -46,7 +46,7 @@ socket.bind('workspaces.deleted', function(data){
 
 socket.bind('workspaces.select', function(data){
   console.log('select', data);
-  data.info = JSON.stringify(data.info, null, 2);
+  data.info_str = JSON.stringify(data.info, null, 2);
   var rendered = workspace_details({workspace: data, request: request});
   $("#workspace-detail").empty().append(rendered);
   console.log($('.modal').modal());
@@ -77,10 +77,10 @@ socket.bind('notifications', function(data){
 $(document).ready(function () {
 	/*
 	socket.bind('workspaces', function(){
-		$('[data-workspace="'+20+'"]').click();
+		$('[data-workspace="'+31+'"]').click();
 	});
 	*/
-	$('#workspaces').off().on('click', 'li.collection-item', function(e) {
+	$('#workspaces').off().on('click', '.collection-item', function(e) {
 		e.preventDefault();
 		var $this = $(this);
 
@@ -139,11 +139,33 @@ $(document).ready(function () {
      	socket.send('workspaces.add', data);
      	$("#editModal").modal('close');
      	return false;
+    })
+    
+  $(document).on('click', "#add_share_button", function(e) {
+     	e.preventDefault();
+     	var data = {};
+      $("form.add_share").serializeArray().map(function(x){data[x.name] = x.value;}); 
+      
+     	socket.send('workspaces.shares.add', data);
+     	$("#shareAdd").modal('close');
+     	return false;
+    });
+    
+    $(document).on('click', "#remove_share_button", function(e) {
+     	e.preventDefault();
+     	var data = {};
+     	data.username = $('[href=#shareRemove]').parents('[data-username]').attr('data-username');
+     	
+      $("form.remove_share").serializeArray().map(function(x){data[x.name] = x.value;}); 
+      
+     	socket.send('workspaces.shares.add', data);
+     	$("#shareRemove").modal('close');
+     	return false;
     });
 	
 	$('.live-search-box').on('keyup', function(){
 		var searchTerm = $(this).val().toLowerCase();
-	    $('.live-search-list li').each(function(){
+	    $('.live-search-list .collection-item').each(function(){
 	        if ($(this).filter('[data-search-term *= ' + searchTerm + ']').length > 0 || searchTerm.length < 1) {
 	            $(this).show();
 	        } else {
@@ -153,3 +175,93 @@ $(document).ready(function () {
 	});
 			
 });
+
+
+
+
+
+
+
+
+
+
+
+$.fn.autocompleteWS = function (options) {
+      // Defaults
+      var defaults = {
+        data: {
+      "Apple": null,
+      "Microsoft": null,
+      "Google": 'http://placehold.it/250x250'
+    }
+      };
+
+      options = $.extend(defaults, options);
+
+      return this.each(function() {
+        var $input = $(this);
+        var data = options.data,
+            $inputDiv = $input.closest('.input-field'); // Div to append on
+
+        // Check if data isn't empty
+        if (!$.isEmptyObject(data)) {
+          // Create autocomplete element
+          var $autocomplete = $('<ul class="autocomplete-content dropdown-content"></ul>');
+
+          // Append autocomplete element
+          if ($inputDiv.length) {
+            $inputDiv.append($autocomplete); // Set ul in body
+          } else {
+            $input.after($autocomplete);
+          }
+
+          var highlight = function(string, $el) {
+            var img = $el.find('img');
+            var matchStart = $el.text().toLowerCase().indexOf("" + string.toLowerCase() + ""),
+                matchEnd = matchStart + string.length - 1,
+                beforeMatch = $el.text().slice(0, matchStart),
+                matchText = $el.text().slice(matchStart, matchEnd + 1),
+                afterMatch = $el.text().slice(matchEnd + 1);
+            $el.html("<span>" + beforeMatch + "<span class='highlight'>" + matchText + "</span>" + afterMatch + "</span>");
+            if (img.length) {
+              $el.prepend(img);
+            }
+          };
+          
+          socket.bind('users.autocomplete', function(data){
+						console.log('users.autocomplete', data);
+						$autocomplete.empty();
+						var users = data.users;
+						for (var i in users) {
+							var autocompleteOption = $('<li></li>');
+							autocompleteOption.append('<img src="https://github.com/'+users[i].username+'.png?size=42" class="right circle"><span>'+ users[i].username +'</span>');
+							$autocomplete.append(autocompleteOption);
+	            highlight(data.query, autocompleteOption);
+						}
+					});
+
+          // Perform search
+          $input.on('keyup', function (e) {
+            // Capture Enter
+            if (e.which === 13) {
+              $autocomplete.find('li').first().click();
+              return;
+            }
+
+            var val = $input.val().toLowerCase();
+
+            // Check if the input isn't empty
+            if (val !== '') {
+            	socket.send('users.autocomplete', {'username': val});
+            }
+          });
+
+          // Set input value
+          $autocomplete.on('click', 'li', function () {
+            $input.val($(this).text().trim());
+            $input.trigger('change');
+            $autocomplete.empty();
+          });
+        }
+      });
+};

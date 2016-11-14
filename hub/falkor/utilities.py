@@ -1,6 +1,9 @@
 import socket, struct
 from docker import Client
 from django.conf import settings
+from .models import Project
+
+from guardian.shortcuts import get_objects_for_user
 
 def get_default_gateway_linux():
     """Read the default gateway directly from /proc."""
@@ -54,7 +57,7 @@ def get_workspace_endpoints(cli, workspace):
                 s = line.split()
                 if s[3].startswith('127.0.0.') and s[6] == '-':
                     continue
-                if s[3].startswith('0.0.0.0:80') and s[6].endswith('/node'):
+                if s[3] == '0.0.0.0:80' and s[6].endswith('/node'):
                     continue
                 ip = container['NetworkSettings']['Networks'].items()[0][1]['IPAddress'].replace('.', '_')
                 name = s[0] +'-'+ ip + '-' +s[3].split(':')[1]
@@ -62,7 +65,30 @@ def get_workspace_endpoints(cli, workspace):
     return workspace.endpoints
     
 def get_workspaces_for_user(cli, user):
-    workspaces = user.created_projects.all().order_by('-created_at')
+    workspaces = get_objects_for_user(user, 'can_open_ide', klass=Project).order_by('-created_at')
+    #workspaces = user.created_projects.all().order_by('-created_at')
     for workspace in workspaces:
         get_workspace_state(cli, workspace)
+        workspace.shared = user != workspace.user
     return workspaces
+    
+    
+def get_workspace_full(cli, request_user, workspace):
+    if workspace.container_id:
+        container = cli.inspect_container(workspace.container_id)
+        workspace.info = container
+        get_workspace_state(cli, workspace)
+        get_workspace_endpoints(cli, workspace)
+        
+    workspace.shared = request_user != workspace.user
+    
+    from guardian.shortcuts import get_perms, get_users_with_perms
+    workspace.permissions = dict([(v, True) for v in get_perms(request_user, workspace)])
+    workspace.shares = []
+    for user, perms in get_users_with_perms(workspace, attach_perms=True).items():
+        share = {'username': user.username, 'permissions': dict([(v, True) for v in perms]), 'owner': user == workspace.user}
+        if share['owner']:
+            workspace.shares.insert(0, share)
+        else:
+            workspace.shares.append(share)
+    return workspace

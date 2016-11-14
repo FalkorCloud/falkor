@@ -31,17 +31,25 @@ class WorkspaceAdmin(GuardedModelAdmin):
     def fix_networks(self, request, queryset):
         cli = docker_cli()
         for workspace in queryset.all():
+            from guardian.shortcuts import assign_perm
+            assign_perm('can_open_ide', workspace.user, workspace)
+            assign_perm('can_start_stop', workspace.user, workspace)
+            assign_perm('can_edit_shares', workspace.user, workspace)
+            assign_perm('delete_project', workspace.user, workspace)
+            assign_perm('change_project', workspace.user, workspace)
+            
             user_network = get_or_create_user_network(cli, workspace.user)
             print user_network
             container = cli.inspect_container(workspace.container_id)
-            for name, network in container["NetworkSettings"]["Networks"].items():
-                if user_network['Name'] != name:
-                    cli.disconnect_container_from_network(container['Id'], name)
-            if user_network['Name'] not in container["NetworkSettings"]["Networks"]:
-                cli.connect_container_to_network(container['Id'], user_network['Name'])
-            for proxy in cli.containers(filters={'status':'running', 'label': ['com.docker.compose.service=proxy']}):
-                if user_network['Name'] not in proxy["NetworkSettings"]["Networks"]:
-                    cli.connect_container_to_network(proxy['Id'], user_network['Name'])
+            if container['State']['Status'] == 'running':
+                for name, network in container["NetworkSettings"]["Networks"].items():
+                    if user_network['Name'] != name and name != 'bridge':
+                        cli.disconnect_container_from_network(container['Id'], name)
+                if user_network['Name'] not in container["NetworkSettings"]["Networks"]:
+                    cli.connect_container_to_network(container['Id'], user_network['Name'])
+                for proxy in cli.containers(filters={'status':'running', 'label': ['com.docker.compose.service=proxy']}):
+                    if user_network['Name'] not in proxy["NetworkSettings"]["Networks"]:
+                        cli.connect_container_to_network(proxy['Id'], user_network['Name'])
             workspace.save()
     
     def claim_workspaces(self, request, queryset):   

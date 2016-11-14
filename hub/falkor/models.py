@@ -24,7 +24,7 @@ class EditorType(models.Model):
 class Project(models.Model):
     editor_type = models.ForeignKey(EditorType)
     name = models.CharField(max_length=200)
-    slug = AutoSlugField(populate_from='name', null=True, blank=True)
+    slug = AutoSlugField(populate_from='name', null=True, blank=True, always_update=True, editable=True)
     user = models.ForeignKey(User, related_name='created_projects')
     container_id = models.CharField(max_length=200, null=True, blank=True)
     
@@ -33,6 +33,11 @@ class Project(models.Model):
     
     class Meta:
         unique_together = (("name", "user"),)
+        permissions = (
+            ("can_open_ide", "Can open IDE"),
+            ("can_start_stop", "Can control the container"),
+            ("can_edit_shares", "Can edit shares"),
+        )
     
     def __unicode__(self):
         from utilities import docker_cli
@@ -42,10 +47,12 @@ class Project(models.Model):
             return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, str(container['NetworkSettings']['Networks'].keys()))
         except:
             return 'Project {1}/{0}   [{2}] - {3}'.format(self.name, self.user, self.slug, 'Missing')
-        
+     
+    @property   
     def urlPrefix(self):
         return self.editor_type.urlPrefix.format(**vars(self))
     
+    @property
     def urlSuffix(self):
         return self.editor_type.urlSuffix.format(**vars(self))
         

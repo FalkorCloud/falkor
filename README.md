@@ -104,4 +104,7 @@ https://github.com/scrooloose/vimfiles
 
 
 tail -f /var/log/something to keep it running
+
+
+/etc/hosts  ->  172.17.0.1 docker
 ```

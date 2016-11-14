@@ -10,7 +10,7 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 
-from .utilities import get_workspaces_for_user, docker_cli, get_workspace_state, get_workspace_endpoints, get_or_create_user_network
+from .utilities import get_workspaces_for_user, docker_cli, get_workspace_state, get_workspace_endpoints, get_or_create_user_network, get_workspace_full
 
 def create_event(event_name, data):
     print 'CREATE',  event_name
@@ -25,12 +25,16 @@ def create_event(event_name, data):
 def model_to_dict(instance):
     w = {field.name: field.value_from_object(instance) for field in instance._meta.fields}
     w.update({'editor_type': {field.name: field.value_from_object(instance.editor_type) for field in instance.editor_type._meta.fields}})
+    w.update({'user': {'id': instance.user.id, 'username': instance.user.username}})
+    w.update({'shared': getattr(instance, 'shared', None)})
+    w.update({'permissions': getattr(instance, 'permissions', None)})
+    w.update({'shares': getattr(instance, 'shares', None)})
     w.update({'running': getattr(instance, 'running', None)})
     w.update({'state': getattr(instance, 'state', None)})
     w.update({'info': getattr(instance, 'info', None)})
     w.update({'endpoints': getattr(instance, 'endpoints', None)})
-    w.update({'urlPrefix': getattr(instance, 'urlPrefix', lambda: None)()})
-    w.update({'urlSuffix': getattr(instance, 'urlSuffix', lambda: None)()})
+    w.update({'urlPrefix': getattr(instance, 'urlPrefix', lambda: None)})
+    w.update({'urlSuffix': getattr(instance, 'urlSuffix', lambda: None)})
     return w
 
 #--------------------------------------------------
@@ -46,53 +50,57 @@ def docker_events(message):
 def send_update(sender, instance, created, **kwargs):
     cli = docker_cli()
     get_workspace_state(cli, instance)
+    #TODO: send for each user
     Group("user-%s" % instance.user.pk).send(create_event('workspaces.created' if created else 'workspaces.update', model_to_dict(instance)))
 
 
 @receiver(post_delete, sender=Project)
 def send_delete(sender, instance, **kwargs):
     cli = docker_cli()
+    #TODO: send for each user
     Group("user-%s" % instance.user.pk).send(create_event('workspaces.deleted', model_to_dict(instance)))
 
 
 @channel_session_user
 def select_workspace(message):
     data = json.loads(message['data'])
-    workspace = get_object_or_404(Project, pk=data['workspace_id'], user=message.user)
+    workspace = get_object_or_404(Project, pk=data['workspace_id'])
+
+    if not message.user.has_perm('falkor.can_open_ide', workspace):
+        return
     
-    if workspace.container_id:
-        cli = docker_cli()
-        container = cli.inspect_container(workspace.container_id)
-        workspace.info = container
-        get_workspace_state(cli, workspace)
-        get_workspace_endpoints(cli, workspace)
+    cli = docker_cli()
+    get_workspace_full(cli, message.user, workspace)
     
-    Group("user-%s" % workspace.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
+    Group("user-%s" % message.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
 
 
 @channel_session_user
 def control_workspace(message):
     data = json.loads(message['data'])
-    workspace = get_object_or_404(Project, pk=data['workspace_id'], user=message.user)
+    workspace = get_object_or_404(Project, pk=data['workspace_id'])
     
+    if not message.user.has_perm('falkor.can_start_stop', workspace):
+        Group("user-%s" % message.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'you cannot'}))
+        return
+
     command = data['command']
     
+    cli = docker_cli()
+    
     if workspace.container_id:
-        cli = docker_cli()
         if command == 'start':
             cli.start(workspace.container_id)
-            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'started container'}))
+            Group("user-%s" % message.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'started container'}))
         elif command == 'stop':
             cli.stop(workspace.container_id)
-            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'stopped container'}))
+            Group("user-%s" % message.user.pk).send(create_event('notifications', {'level': 'info', 'message': 'stopped container'}))
         else:
-            Group("user-%s" % workspace.user.pk).send(create_event('notifications', {'level': 'error', 'message': 'No such command '+command}))
-        container = cli.inspect_container(workspace.container_id)
-        workspace.info = container
-        get_workspace_state(cli, workspace)
-        get_workspace_endpoints(cli, workspace)
+            Group("user-%s" % message.user.pk).send(create_event('notifications', {'level': 'error', 'message': 'No such command '+command}))
+    
+    get_workspace_full(cli, message.user, workspace)
             
-    Group("user-%s" % workspace.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
+    Group("user-%s" % message.user.pk).send(create_event('workspaces.select', model_to_dict(workspace)))
 
 @channel_session_user
 def add_workspace(message):
@@ -115,6 +123,13 @@ def add_workspace(message):
     workspace.user = message.user
     workspace.name = workspace_name
     workspace.save()
+    
+    from guardian.shortcuts import assign_perm
+    assign_perm('can_open_ide', message.user, workspace)
+    assign_perm('can_start_stop', message.user, workspace)
+    assign_perm('can_edit_shares', message.user, workspace)
+    assign_perm('delete_project', workspace.user, workspace)
+    assign_perm('change_project', workspace.user, workspace)
     
     cli = docker_cli()
     

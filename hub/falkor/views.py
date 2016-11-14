@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.views.decorators.cache import cache_control
 
+from guardian.shortcuts import get_objects_for_user
+
 from django.http import HttpResponse
 import json
 
@@ -37,10 +39,10 @@ def workspaces(request):
     workspace_name = request.GET.get('workspace', None)
 
     if workspace_name:
-        workspaces = request.user.created_projects.filter(slug__iexact=workspace_name)
+        workspaces = get_objects_for_user(request.user, 'can_open_ide', klass=Project).filter(slug__iexact=workspace_name)
         #TODO: update last used
     else:
-        workspaces = request.user.created_projects.all()
+        workspaces = get_objects_for_user(request.user, 'can_open_ide', klass=Project).all()
     
     cli = docker_cli()
     response_data = {}

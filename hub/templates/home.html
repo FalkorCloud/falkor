@@ -8,14 +8,15 @@
 
 <script id="template" type="text/x-handlebars-template">
 	{% verbatim %}
-	<li data-workspace="{{ workspace_.id }}" href="/workspaces/{{ workspace_.id }}" class="collection-item avatar">
+	<a data-workspace="{{ workspace_.id }}" href="/workspaces/{{ workspace_.id }}" class="collection-item avatar">
 		<i class="material-icons circle {{#if workspace_.running}}green{{else}}red{{/if}}">insert_chart</i>
-		<span class="title">{{ workspace_.name }}</span>
+		<span class="title">{{#if workspace_.shared}}<span class="light-blue-text text-darken-2" title="Shared with you">{{ workspace_.user.username }}</span>/{{/if}}{{ workspace_.name }}</span>
 		<p>{{ workspace_.state.status }}
-			<br>  {{#if workspace_.state.IPAddress}} {{ workspace_.state.IPAddress }} {{else}}-{{/if}}
+			<br>{{#if workspace_.state.IPAddress}} {{ workspace_.state.IPAddress }} {{else}}-{{/if}}
+			{{#if workspace_.shared}}<span class="right"><i class="material-icons">supervisor_account</i></span>{{/if}}
 		</p>
-		<a href="#!" class="secondary-content"><i class="material-icons">send</i></a>
-	</li>
+		<span class="secondary-content"><i class="material-icons">send</i></span>
+	</a>
 	{% endverbatim %}
 </script>
 
