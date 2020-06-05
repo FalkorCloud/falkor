@@ -1,4 +1,4 @@
-Django==1.10.3
+Django==1.11.29
 PyJWT==1.4.2
 Twisted==16.5.0
 argparse==1.2.1
