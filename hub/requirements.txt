@@ -4,7 +4,7 @@ Twisted==16.5.0
 argparse==1.2.1
 asgi-redis==0.14.0
 asgiref==0.14.0
-autobahn==0.16.0
+autobahn==20.12.3
 backports.ssl-match-hostname==3.5.0.1
 channels==0.17.3
 chardet==2.3.0
