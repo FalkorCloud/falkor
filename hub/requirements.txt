@@ -31,7 +31,7 @@ requests-oauthlib==0.7.0
 six==1.10.0
 supervisor==3.0b2
 txaio==2.5.1
-urllib3==1.7.1
+urllib3==1.26.5
 websocket-client==0.37.0
 wheel==0.24.0
 wsgiref==0.1.2
